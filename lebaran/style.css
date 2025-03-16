@@ -1,7 +1,7 @@
 body {
     background-image: url('background.png');
     background-repeat: no-repeat;
-    background-size: 80%;
+    background-size: cover;
     color: white;
     font-family: 'Quicksand', sans-serif;
 }
