@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Teks Berjalan + YouTube & Lirik</title>
+<style>
+html,body{
+  margin:0; padding:0; height:100%; width:100%; font-family:sans-serif;
+  overflow:hidden; color:#fff; background:#111; display:flex; align-items:center; justify-content:center;
+}
+.card{
+  width:95%; max-width:400px; background:rgba(255,255,255,0.05);
+  padding:1rem; border-radius:12px; text-align:center; z-index:1000; position:absolute; top:10px;
+}
+input,select,textarea,button{
+  width:100%; margin:.3rem 0; padding:.5rem; border-radius:8px;
+  border:1px solid rgba(255,255,255,0.2); background:transparent; color:#fff;
+}
+select[multiple]{ height:80px; }
+textarea{ resize:none; height:60px; }
+button{ background:#06b6d4; border:none; color:#002034; font-weight:600; cursor:pointer; }
+
+.stage{position:absolute; left:0; width:100%; overflow:hidden; display:flex; align-items:center;}
+.ticker{white-space:nowrap; display:inline-block; padding-left:100%; font-size:clamp(16px,3vw,24px);
+font-weight:bold; text-shadow:0 2px 6px rgba(0,0,0,.6);}
+.ticker.right{animation:slide-left linear infinite;}
+.ticker.left{animation:slide-right linear infinite;}
+@keyframes slide-left{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+@keyframes slide-right{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+.youtube{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%); z-index:500;}
+.lyrics{position:absolute;bottom:5%;width:90%;margin:0 5%;text-align:center;font-size:16px;color:#ff0;text-shadow:0 0 6px #000;}
+.audioNotice{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+background:rgba(0,0,0,0.6);padding:1rem 2rem;border-radius:12px;z-index:1000;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <input id="textInput" type="text" placeholder="Tulis teks berjalan..." value="Halo ini teks berjalan!">
+
+  <label>Emoticon (Ctrl/Cmd + klik untuk pilih banyak):</label>
+  <select id="emojiSelect" multiple>
+    <option value="😊">😊</option>
+    <option value="🎉">🎉</option>
+    <option value="❤️">❤️</option>
+    <option value="🔥">🔥</option>
+    <option value="🚀">🚀</option>
+    <option value="✨">✨</option>
+    <option value="😎">😎</option>
+    <option value="😂">😂</option>
+    <option value="💡">💡</option>
+    <option value="🌟">🌟</option>
+    <option value="🍀">🍀</option>
+    <option value="🎶">🎶</option>
+  </select>
+
+  <label>Gambar Latar:</label>
+  <input id="imgInput" type="file" accept="image/*">
+
+  <label>Link YouTube:</label>
+  <input id="ytLink" type="text" placeholder="https://www.youtube.com/watch?v=...">
+
+  <label>Lirik (opsional):</label>
+  <textarea id="lyrics" placeholder="Masukkan lirik..."></textarea>
+
+  <button id="showBtn">Tampilkan</button>
+</div>
+
+<script>
+function getAverageColor(imgFile, callback){
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.src=e.target.result;
+    img.onload=function(){
+      const canvas=document.createElement('canvas');
+      canvas.width=50; canvas.height=50;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,50,50);
+      const data=ctx.getImageData(0,0,50,50).data;
+      let r=0,g=0,b=0;
+      const count=data.length/4;
+      for(let i=0;i<data.length;i+=4){ r+=data[i]; g+=data[i+1]; b+=data[i+2]; }
+      r=Math.round(r/count); g=Math.round(g/count); b=Math.round(b/count);
+      callback({r,g,b});
+    }
+  };
+  reader.readAsDataURL(imgFile);
+}
+
+function getContrastColor({r,g,b}){
+  const luminance=0.2126*r+0.7152*g+0.0722*b;
+  return luminance>128?'#000000':'#ffffff';
+}
+
+function shuffleArray(arr){ return arr.sort(()=>Math.random()-0.5); }
+
+function extractYouTubeID(url){
+  try{
+    const u=new URL(url);
+    if(u.hostname.includes('youtube.com')) return u.searchParams.get('v');
+    else if(u.hostname.includes('youtu.be')) return u.pathname.slice(1);
+  }catch(e){return null;}
+  return null;
+}
+
+document.getElementById('showBtn').addEventListener('click',function(){
+  const text=document.getElementById('textInput').value||'...';
+  const emojiSelect=document.getElementById('emojiSelect');
+  const selectedEmojis=Array.from(emojiSelect.selectedOptions).map(o=>o.value);
+  const imgFile=document.getElementById('imgInput').files[0];
+  const ytUrl=document.getElementById('ytLink').value.trim();
+  const lyrics=document.getElementById('lyrics').value.trim().replace(/\n/g,'<br>');
+
+  if(!imgFile){ alert('Pilih gambar latar dulu'); return; }
+  if(!ytUrl){ alert('Masukkan link YouTube dulu'); return; }
+
+  const videoId=extractYouTubeID(ytUrl);
+  if(!videoId){ alert('Link YouTube tidak valid atau tidak kompatibel'); return; }
+
+  getAverageColor(imgFile,function(avgColor){
+    const textColor=getContrastColor(avgColor);
+    const reader=new FileReader();
+    reader.onload=function(e){
+      const imgData=e.target.result;
+      document.getElementById('card').remove();
+      document.body.style.background=`url('${imgData}') center/cover no-repeat fixed`;
+
+      // Teks berjalan lambat
+      const rows=12;
+      for(let i=0;i<rows;i++){
+        const div=document.createElement('div');
+        div.className='stage';
+        div.style.top=`${i*100/rows}%`;
+        div.style.height=`${100/rows}%`;
+        const ticker=document.createElement('div');
+        ticker.className='ticker '+(i%2===0?'right':'left');
+        ticker.style.color=textColor;
+        ticker.style.animationDuration=`${12+Math.random()*6}s`; // lebih lambat
+        const emojiStr=shuffleArray(selectedEmojis).join(' ');
+        ticker.innerHTML=emojiStr+' '+text+' '+emojiStr+' '+text;
+        div.appendChild(ticker);
+        document.body.appendChild(div);
+      }
+
+      // YouTube embed muted autoplay
+      const ytDiv=document.createElement('div');
+      ytDiv.className='youtube';
+      ytDiv.innerHTML=`<iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+      document.body.appendChild(ytDiv);
+
+      // Lirik
+      if(lyrics){
+        const lyricsDiv=document.createElement('div');
+        lyricsDiv.className='lyrics';
+        lyricsDiv.innerHTML=lyrics;
+        document.body.appendChild(lyricsDiv);
+      }
+
+      // Update emoticon tiap 3 detik
+      const tickers=document.querySelectorAll('.ticker');
+      setInterval(()=>{ tickers.forEach(t=>{
+        const emojiStr=shuffleArray(selectedEmojis).join(' ');
+        t.innerHTML=emojiStr+' '+text+' '+emojiStr+' '+text;
+      })},3000);
+
+    };
+    reader.readAsDataURL(imgFile);
+  });
+});
+</script>
+
+</body>
+</html>
