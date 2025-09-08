@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Buat Halaman Baru</title>
+<style>
+html,body{
+  margin:0;
+  padding:0;
+  height:100%;
+  width:100%;
+  font-family:sans-serif;
+  color:#fff;
+  background:#111;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.card{
+  width:95%;
+  max-width:400px;
+  background:rgba(255,255,255,0.05);
+  padding:1rem;
+  border-radius:12px;
+  text-align:center;
+}
+input,button{
+  width:100%;
+  margin:.3rem 0;
+  padding:.5rem;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.2);
+  background:transparent;
+  color:#fff;
+}
+button{
+  background:#06b6d4;
+  border:none;
+  color:#002034;
+  font-weight:600;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <input id="textInput" type="text" placeholder="Tulis teks berjalan..." value="Halo ini teks berjalan!">
+  <label style="font-size:13px;display:block;text-align:left;margin-top:.5rem">Pilih Gambar Latar:</label>
+  <input id="imgInput" type="file" accept="image/*">
+  <button id="showBtn">Tampilkan (Halaman Baru)</button>
+</div>
+
+<script>
+document.getElementById('showBtn').addEventListener('click', function () {
+  const text = document.getElementById('textInput').value || '...';
+  const imgFile = document.getElementById('imgInput').files[0];
+
+  if (!imgFile) {
+    alert('Pilih gambar latar dulu');
+    return;
+  }
+
+  // baca file gambar jadi base64
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const imgData = e.target.result; // data URL base64
+
+    // halaman baru
+    const newHtml = `<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Halaman Generated</title>
+<style>
+html,body{
+  margin:0;
+  padding:0;
+  height:100%;
+  width:100%;
+  color:#fff;
+  font-family:sans-serif;
+  background:url('${imgData}') center center / cover no-repeat fixed;
+  overflow:hidden;
+}
+.stage{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:90%;
+  overflow:hidden;
+  height:50px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.ticker{
+  white-space:nowrap;
+  display:inline-block;
+  padding-left:100%;
+  animation:slide-left 10s linear infinite;
+  font-size:clamp(16px,4vw,24px);
+  font-weight:bold;
+  text-shadow:0 2px 6px rgba(0,0,0,.6);
+}
+@keyframes slide-left{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-100%)}
+}
+</style>
+</head>
+<body>
+<div class="stage"><div class="ticker">${text} &nbsp; ${text}</div></div>
+<audio src="https://serverazka.github.io/funkot.mp3" autoplay loop></audio>
+</body>
+</html>`;
+
+    const blob = new Blob([newHtml], {type: 'text/html'});
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  };
+  reader.readAsDataURL(imgFile);
+});
+</script>
+
+</body>
+</html>
