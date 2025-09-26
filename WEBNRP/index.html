@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login NRP</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle at center,
+                #000000 0%,
+                #1a1a1a 40%,
+                #00ff80 80%,
+                #808080 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .login-container {
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 0 15px rgba(0,255,128,0.5);
+    text-align: center;
+    color: #00ff80;
+  }
+  h2 {margin-top: 0;color: #00ff80;}
+  
+  input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 15px 0;
+    display: inline-block;
+    border: 1px solid #00ff80;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    background: #00ff80;
+    color: #000;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+  
+  /* --- STYLES UNTUK PESAN MULTI-BARIS & FADE --- */
+
+  #msg {
+      margin-top: 15px; 
+      font-weight: bold;
+      /* Mengizinkan teks turun baris */
+      white-space: normal; 
+      text-align: center;
+      min-height: 30px; /* Minimal tinggi agar pesan singkat tidak terlalu naik */
+      padding: 0 5px; 
+  }
+
+  /* Animasi Fade In */
+  .fade-in {
+      opacity: 0;
+      animation: fade-in-anim 0.7s ease-out forwards; /* Durasi sedikit diperpanjang */
+  }
+  @keyframes fade-in-anim {
+      from { opacity: 0; }
+      to { opacity: 1; }
+  }
+
+  /* Animasi Fade Out */
+  .fade-out {
+      animation: fade-out-anim 0.5s ease-out forwards;
+  }
+  @keyframes fade-out-anim {
+      from { opacity: 1; }
+      to { opacity: 0; }
+  }
+  
+</style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Login NRP</h2>
+    <input type="text" id="nrp" placeholder="Masukkan NRP">
+    <button onclick="login()">Login</button>
+    <div id="msg"></div>
+  </div>
+
+<script>
+async function login(){
+  const nrpInput = document.getElementById('nrp').value.trim();
+  const msg = document.getElementById('msg');
+  
+  // Reset pesan dan style
+  msg.style.color = '#00ff80'; 
+  msg.classList.remove('fade-in', 'fade-out');
+  msg.innerHTML = ''; 
+
+  if(!nrpInput){
+    msg.style.color = '#ff6666';
+    msg.innerHTML = 'Silakan isi NRP';
+    return;
+  }
+  
+  try {
+    const res = await fetch('users.json'); 
+    const data = await res.json();
+    const found = data.users.find(u => u.nrp === nrpInput);
+
+    if (found) {
+      // Membersihkan koma di akhir jika ada
+      let namaBersih = found.nama.replace(/,\s*$/, '');
+      let pangkatBersih = found.pangkat.replace(/,\s*$/, '');
+      
+      const welcomeText = `Selamat datang ${pangkatBersih} ${namaBersih}`; 
+      
+      const fadeDuration = 700; // Durasi Fade In di CSS
+      const displayDuration = 2000; // Durasi teks ditampilkan
+      
+      // 1. Tampilkan dan Fade In
+      msg.innerHTML = welcomeText;
+      msg.classList.add('fade-in');
+      
+      // 2. Mulai Fade Out setelah ditampilkan
+      setTimeout(() => {
+        msg.classList.remove('fade-in');
+        msg.classList.add('fade-out');
+      }, fadeDuration + displayDuration); // Teks tampil selama (0.7s + 2.0s) = 2.7 detik total sebelum hilang
+
+      
+      // 3. Redirect setelah Fade Out selesai (total durasi)
+      setTimeout(() => {
+        localStorage.setItem('nrp', nrpInput);
+        // Mengalihkan ke halaman pilihan.html (Pilih Ukuran)
+        window.location.href = 'pilihan.html';
+      }, fadeDuration + displayDuration + 500); // 0.7s + 2.0s + 0.5s = 3.2 detik
+
+    } else {
+      msg.style.color = '#ff6666';
+      msg.innerHTML = 'NRP tidak ditemukan.';
+    }
+  } catch (error) {
+    msg.style.color = '#ff6666';
+    msg.innerHTML = 'Terjadi kesalahan saat memuat data.';
+    console.error('Error fetching data:', error);
+  }
+}
+</script>
+</body>
+</html>
