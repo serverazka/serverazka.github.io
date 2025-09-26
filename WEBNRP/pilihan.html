@@ -182,7 +182,7 @@ function kirim(){
     {id:'tshirt', name:'T-SHIRT'},
     {id:'sepatu', name:'SEPATU'},
     {id:'topi', name:'BARET/TOPI'},
-    {id:'ikatpinggang', name:'IKAT PINGGANG TRIBRATA'}, 
+    {id:'ikatpinggang', name:'IKAT PINGGANG TRIBATA'}, 
     {id:'kopel', name:'KOPEL'} 
   ];
 
@@ -212,7 +212,7 @@ function kirim(){
     method: 'POST',
     body: new URLSearchParams(data)
   })
-  .then(response => response.json())
+  .then(res => res.json())
   .then(result => {
     if(result.result === 'success'){
       container.innerHTML = `
@@ -234,5 +234,6 @@ function kirim(){
   });
 }
 </script>
+
 
 
