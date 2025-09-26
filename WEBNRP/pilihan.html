@@ -209,31 +209,18 @@ function kirim(){
   container.innerHTML = `<div style="text-align:center; color:#00ff80;">Mengirim data... Mohon tunggu.</div>`;
 
   fetch(WEB_APP_URL, {
-    method: 'POST',
-    body: new URLSearchParams(data)
-  })
-  .then(res => res.json())
-  .then(result => {
-    if(result.result === 'success'){
-      container.innerHTML = `
-        <div style="text-align:center; padding:50px 0; color:#00ff80;">
-          <h2>TERIMA KASIH</h2>
-          <p>Data ukuran Anda telah berhasil direkam di Spreadsheet.</p>
-          <button onclick="localStorage.removeItem('nrp'); window.location.href='index.html';">Logout</button>
-        </div>
-      `;
-    } else {
-      container.innerHTML = `<p style="color:#ff6666; text-align:center;">Gagal: ${result.message}</p>`;
-    }
-  })
-  .catch(err=>{
-    container.innerHTML = `<p style="color:#ff6666; text-align:center;">
-      ⚠️ Gagal terhubung. Error: ${err.message}
-    </p>`;
-    console.error(err);
-  });
-}
-</script>
+  method: 'POST',
+  body: new URLSearchParams(data)
+})
+.then(res => res.json())
+.then(result => {
+  if(result.result === 'success') alert('Data berhasil dikirim!');
+  else alert('Gagal: ' + result.message);
+})
+.catch(err => {
+  console.error(err);
+  alert('⚠️ Gagal terhubung. Error: ' + err.message);
+});
 
 
 
