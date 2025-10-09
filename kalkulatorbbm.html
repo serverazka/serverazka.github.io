@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator BBM - Pertamina</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS sebelumnya tetap sama, tidak diubah */
+        :root {
+            --pertamina-blue: #0033a0;
+            --pertamina-red: #e4002b;
+            --pertamina-white: #ffffff;
+            --pertamina-gray: #f5f5f5;
+            --pertamina-dark: #333333;
+            --pertamina-yellow: #ffd100;
+            --pertamina-green: #00a550;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0033a0 0%, #001a5e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background: var(--pertamina-red);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .card-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: var(--pertamina-blue);
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--pertamina-dark);
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--pertamina-blue);
+        }
+
+        .pertamina-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .logo-circle {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-text {
+            font-weight: bold;
+            font-size: 24px;
+            color: white;
+        }
+
+        .logo-circle i {
+            font-size: 30px;
+            color: var(--pertamina-red);
+        }
+
+        .fuel-types {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .fuel-types {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .fuel-type {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .fuel-type:hover {
+            border-color: var(--pertamina-blue);
+            transform: translateY(-3px);
+        }
+
+        .fuel-type.selected {
+            border-color: var(--pertamina-red);
+            background: rgba(228, 0, 43, 0.05);
+        }
+
+        .fuel-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .fuel-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .fuel-price-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--pertamina-dark);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--pertamina-blue);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 51, 160, 0.2);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .checkbox-group input {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .traffic-section {
+            margin-top: 20px;
+        }
+
+        .traffic-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-option {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-option.selected {
+            border-color: var(--pertamina-red);
+            background: rgba(228, 0, 43, 0.05);
+        }
+
+        .traffic-presets {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .traffic-preset {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .traffic-preset:hover {
+            border-color: var(--pertamina-blue);
+        }
+
+        .traffic-preset.selected {
+            border-color: var(--pertamina-red);
+            background: rgba(228, 0, 43, 0.05);
+        }
+
+        .traffic-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .traffic-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .traffic-time {
+            font-size: 12px;
+            color: var(--pertamina-blue);
+        }
+
+        .custom-traffic-input {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .time-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .time-input {
+            flex: 1;
+        }
+
+        .time-unit {
+            font-weight: 600;
+            color: var(--pertamina-dark);
+            min-width: 60px;
+        }
+
+        .traffic-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--pertamina-gray);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--pertamina-red);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #c10024;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--pertamina-blue);
+        }
+
+        .btn-secondary:hover {
+            background: #002580;
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background: var(--pertamina-gray);
+            border-radius: 10px;
+            border-left: 5px solid var(--pertamina-red);
+        }
+
+        .result h3 {
+            margin-bottom: 15px;
+            color: var(--pertamina-dark);
+            font-size: 18px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .result-item {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: var(--pertamina-dark);
+            display: block;
+        }
+
+        .result-value {
+            font-weight: 700;
+            color: var(--pertamina-blue);
+            font-size: 16px;
+        }
+
+        .highlight {
+            color: var(--pertamina-red);
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .note {
+            font-size: 12px;
+            color: #666;
+            margin-top: 20px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .icon {
+            font-size: 18px;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn-container .btn {
+            flex: 1;
+        }
+
+        .history-item {
+            background: var(--pertamina-gray);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--pertamina-green);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .history-date {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .history-btn {
+            background: none;
+            border: none;
+            color: var(--pertamina-blue);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .traffic-impact {
+            background: #fff8e1;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid var(--pertamina-yellow);
+        }
+
+        .impact-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .impact-label {
+            font-weight: 600;
+            color: var(--pertamina-dark);
+        }
+
+        .impact-value {
+            font-weight: 700;
+            color: var(--pertamina-red);
+        }
+
+        .time-breakdown {
+            background: #e8f4fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid var(--pertamina-blue);
+        }
+
+        .time-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .price-suggestion {
+            font-size: 12px;
+            color: var(--pertamina-blue);
+            margin-top: 5px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Kalkulator Section -->
+        <div class="card">
+            <div class="card-header">
+                <div class="pertamina-logo">
+                    <div class="logo-circle">
+                        <i class="fas fa-gas-pump"></i>
+                    </div>
+                    <div class="logo-text">PERTAMINA</div>
+                </div>
+                <h1>Kalkulator Konsumsi BBM</h1>
+                <p>Hitung konsumsi bahan bakar & estimasi biaya perjalanan</p>
+            </div>
+            <div class="card-body">
+                <!-- Form kalkulator (sama seperti sebelumnya) -->
+                <form id="fuelCalculator">
+                    <div class="form-group">
+                        <h3><i class="fas fa-gas-pump"></i> Pilih Jenis BBM & Masukkan Harga</h3>
+                        <div class="fuel-types">
+                            <div class="fuel-type" data-fuel="Pertalite">
+                                <div class="fuel-icon" style="color: #00a550;">
+                                    <i class="fas fa-gas-pump"></i>
+                                </div>
+                                <div class="fuel-name">Pertalite</div>
+                                <input type="number" class="fuel-price-input" id="pricePertalite" placeholder="Harga per liter" min="0" value="10000">
+                                <div class="price-suggestion">*Harga referensi: Rp 10.000</div>
+                            </div>
+                            <div class="fuel-type" data-fuel="Pertamax">
+                                <div class="fuel-icon" style="color: #e4002b;">
+                                    <i class="fas fa-gas-pump"></i>
+                                </div>
+                                <div class="fuel-name">Pertamax</div>
+                                <input type="number" class="fuel-price-input" id="pricePertamax" placeholder="Harga per liter" min="0" value="13500">
+                                <div class="price-suggestion">*Harga referensi: Rp 13.500</div>
+                            </div>
+                            <div class="fuel-type" data-fuel="Pertamax Turbo">
+                                <div class="fuel-icon" style="color: #0033a0;">
+                                    <i class="fas fa-gas-pump"></i>
+                                </div>
+                                <div class="fuel-name">Pertamax Turbo</div>
+                                <input type="number" class="fuel-price-input" id="pricePertamaxTurbo" placeholder="Harga per liter" min="0" value="14200">
+                                <div class="price-suggestion">*Harga referensi: Rp 14.200</div>
+                            </div>
+                            <div class="fuel-type" data-fuel="Dex">
+                                <div class="fuel-icon" style="color: #333333;">
+                                    <i class="fas fa-oil-can"></i>
+                                </div>
+                                <div class="fuel-name">Dex</div>
+                                <input type="number" class="fuel-price-input" id="priceDex" placeholder="Harga per liter" min="0" value="12900">
+                                <div class="price-suggestion">*Harga referensi: Rp 12.900</div>
+                            </div>
+                            <div class="fuel-type" data-fuel="Solar">
+                                <div class="fuel-icon" style="color: #ffd100;">
+                                    <i class="fas fa-oil-can"></i>
+                                </div>
+                                <div class="fuel-name">Solar</div>
+                                <input type="number" class="fuel-price-input" id="priceSolar" placeholder="Harga per liter" min="0" value="6800">
+                                <div class="price-suggestion">*Harga referensi: Rp 6.800</div>
+                            </div>
+                            <div class="fuel-type" data-fuel="Lainnya">
+                                <div class="fuel-icon" style="color: #666666;">
+                                    <i class="fas fa-gas-pump"></i>
+                                </div>
+                                <div class="fuel-name">BBM Lainnya</div>
+                                <input type="number" class="fuel-price-input" id="priceLainnya" placeholder="Harga per liter" min="0" value="10000">
+                                <div class="price-suggestion">*Masukkan harga sesuai kebutuhan</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="distance"><i class="fas fa-route"></i> Jarak Tempuh (km)</label>
+                        <input type="number" id="distance" min="0" step="0.1" placeholder="Masukkan jarak satu arah" required>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="roundTrip">
+                            <label for="roundTrip">Sertakan perjalanan pulang-pergi</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fuelConsumption"><i class="fas fa-tachometer-alt"></i> Konsumsi BBM (km/liter)</label>
+                        <input type="number" id="fuelConsumption" min="0" step="0.1" placeholder="Contoh: 10" required>
+                        <div class="info">Rata-rata mobil: 8-12 km/liter, motor: 30-50 km/liter</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="avgSpeed"><i class="fas fa-speedometer"></i> Kecepatan Rata-rata (km/jam)</label>
+                        <input type="number" id="avgSpeed" min="0" step="1" placeholder="Contoh: 60" value="60" required>
+                        <div class="info">Kecepatan normal: 40-60 km/jam (perkotaan), 60-80 km/jam (luar kota)</div>
+                    </div>
+                    
+                    <div class="form-group traffic-section">
+                        <label><i class="fas fa-traffic-light"></i> Estimasi Waktu Macet</label>
+                        
+                        <div class="traffic-toggle">
+                            <div class="toggle-option" data-type="preset">
+                                <i class="fas fa-list"></i> Pilihan Standar
+                            </div>
+                            <div class="toggle-option" data-type="custom">
+                                <i class="fas fa-edit"></i> Input Manual
+                            </div>
+                        </div>
+                        
+                        <div class="traffic-presets" id="trafficPresets">
+                            <div class="traffic-preset" data-traffic="0" data-time="0">
+                                <div class="traffic-icon" style="color: #00a550;">
+                                    <i class="fas fa-car"></i>
+                                </div>
+                                <div class="traffic-name">Lancar</div>
+                                <div class="traffic-time">+0 menit</div>
+                            </div>
+                            <div class="traffic-preset" data-traffic="1" data-time="15">
+                                <div class="traffic-icon" style="color: #ffd100;">
+                                    <i class="fas fa-car-side"></i>
+                                </div>
+                                <div class="traffic-name">Sedikit Macet</div>
+                                <div class="traffic-time">+15 menit</div>
+                            </div>
+                            <div class="traffic-preset" data-traffic="2" data-time="30">
+                                <div class="traffic-icon" style="color: #ff9800;">
+                                    <i class="fas fa-traffic-light"></i>
+                                </div>
+                                <div class="traffic-name">Macet</div>
+                                <div class="traffic-time">+30 menit</div>
+                            </div>
+                            <div class="traffic-preset" data-traffic="3" data-time="60">
+                                <div class="traffic-icon" style="color: #e4002b;">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="traffic-name">Macet Parah</div>
+                                <div class="traffic-time">+60 menit</div>
+                            </div>
+                        </div>
+                        
+                        <div class="custom-traffic-input" id="customTrafficInput">
+                            <div class="time-input-group">
+                                <div class="time-unit">Jam:</div>
+                                <input type="number" id="customHours" class="time-input" min="0" max="10" value="0" placeholder="0">
+                                <div class="time-unit">Menit:</div>
+                                <input type="number" id="customMinutes" class="time-input" min="0" max="59" value="0" placeholder="0">
+                            </div>
+                            <div class="info">Masukkan estimasi tambahan waktu karena macet</div>
+                        </div>
+                        
+                        <div class="traffic-info" id="trafficInfo">
+                            Pilih tingkat kemacetan yang diperkirakan
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="calculateBtn" class="btn">
+                        <i class="fas fa-calculator"></i> Hitung Konsumsi BBM
+                    </button>
+                </form>
+                
+                <div class="result" id="result" style="display: none;">
+                    <h3><i class="fas fa-chart-line"></i> Hasil Perhitungan</h3>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <span class="result-label">Jenis BBM:</span>
+                            <span class="result-value" id="fuelTypeResult">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Harga BBM:</span>
+                            <span class="result-value" id="fuelPriceResult">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Total Jarak:</span>
+                            <span class="result-value" id="totalDistance">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Konsumsi BBM:</span>
+                            <span class="result-value" id="fuelUsed">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Waktu Tempuh:</span>
+                            <span class="result-value" id="travelTime">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Total Biaya:</span>
+                            <span class="result-value highlight" id="totalCost">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="time-breakdown" id="timeBreakdown">
+                        <h4><i class="fas fa-clock"></i> Rincian Waktu</h4>
+                        <div class="time-item">
+                            <span class="impact-label">Waktu Normal:</span>
+                            <span class="impact-value" id="normalTime">-</span>
+                        </div>
+                        <div class="time-item">
+                            <span class="impact-label">Tambahan Macet:</span>
+                            <span class="impact-value" id="extraTime">-</span>
+                        </div>
+                        <div class="time-item">
+                            <span class="impact-label">Total Waktu:</span>
+                            <span class="impact-value highlight" id="totalTime">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="traffic-impact" id="trafficImpact">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Dampak Kemacetan</h4>
+                        <div class="impact-item">
+                            <span class="impact-label">Tambahan BBM:</span>
+                            <span class="impact-value" id="extraFuel">-</span>
+                        </div>
+                        <div class="impact-item">
+                            <span class="impact-label">Tambahan Biaya:</span>
+                            <span class="impact-value" id="extraCost">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-container">
+                        <button type="button" id="savePdfBtn" class="btn btn-secondary">
+                            <i class="fas fa-file-pdf"></i> Simpan sebagai PDF
+                        </button>
+                        <button type="button" id="saveHistoryBtn" class="btn">
+                            <i class="fas fa-save"></i> Simpan ke Riwayat
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    * Hasil perhitungan ini adalah estimasi. Konsumsi BBM aktual dapat bervariasi tergantung kondisi berkendara.
+                    ** Harga BBM dapat disesuaikan dengan harga aktual di SPBU.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Riwayat Section -->
+        <div class="card">
+            <div class="card-header">
+                <div class="pertamina-logo">
+                    <div class="logo-circle">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="logo-text">PERTAMINA</div>
+                </div>
+                <h1>Riwayat Perhitungan</h1>
+                <p>Simpan dan kelola hasil perhitungan sebelumnya</p>
+            </div>
+            <div class="card-body">
+                <h2><i class="fas fa-clock"></i> Perhitungan Terbaru</h2>
+                <div id="historyList">
+                    <p id="emptyHistory" style="text-align: center; color: #666; padding: 20px;">
+                        Belum ada riwayat perhitungan. Hasil perhitungan akan muncul di sini.
+                    </p>
+                </div>
+                
+                <div class="btn-container">
+                    <button type="button" id="clearHistoryBtn" class="btn">
+                        <i class="fas fa-trash-alt"></i> Hapus Riwayat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calculateBtn = document.getElementById('calculateBtn');
+            const savePdfBtn = document.getElementById('savePdfBtn');
+            const saveHistoryBtn = document.getElementById('saveHistoryBtn');
+            const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+            const resultDiv = document.getElementById('result');
+            const historyList = document.getElementById('historyList');
+            const emptyHistory = document.getElementById('emptyHistory');
+            const trafficPresets = document.querySelectorAll('.traffic-preset');
+            const toggleOptions = document.querySelectorAll('.toggle-option');
+            const trafficInfo = document.getElementById('trafficInfo');
+            const trafficImpact = document.getElementById('trafficImpact');
+            const timeBreakdown = document.getElementById('timeBreakdown');
+            const fuelTypes = document.querySelectorAll('.fuel-type');
+            const customTrafficInput = document.getElementById('customTrafficInput');
+            const trafficPresetsContainer = document.getElementById('trafficPresets');
+            
+            let selectedFuelType = 'Pertalite';
+            let selectedFuelPrice = 10000;
+            let selectedTrafficLevel = 0;
+            let selectedTrafficTime = 0;
+            let trafficInputType = 'preset';
+            let calculationHistory = JSON.parse(localStorage.getItem('fuelCalculationHistory')) || [];
+            
+            // Inisialisasi pilihan BBM
+            fuelTypes.forEach(type => {
+                type.addEventListener('click', function() {
+                    fuelTypes.forEach(t => t.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedFuelType = this.getAttribute('data-fuel');
+                    
+                    const priceInput = this.querySelector('.fuel-price-input');
+                    selectedFuelPrice = parseFloat(priceInput.value) || 0;
+                });
+            });
+            
+            // Event listener untuk input harga
+            document.querySelectorAll('.fuel-price-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    const fuelType = this.closest('.fuel-type');
+                    if (fuelType.classList.contains('selected')) {
+                        selectedFuelPrice = parseFloat(this.value) || 0;
+                    }
+                });
+            });
+            
+            // Toggle antara preset dan custom input
+            toggleOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    toggleOptions.forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    trafficInputType = this.getAttribute('data-type');
+                    
+                    if (trafficInputType === 'preset') {
+                        trafficPresetsContainer.style.display = 'grid';
+                        customTrafficInput.style.display = 'none';
+                        updateTrafficInfo();
+                    } else {
+                        trafficPresetsContainer.style.display = 'none';
+                        customTrafficInput.style.display = 'block';
+                        updateCustomTrafficInfo();
+                    }
+                });
+            });
+            
+            // Inisialisasi pilihan macet preset
+            trafficPresets.forEach(preset => {
+                preset.addEventListener('click', function() {
+                    if (trafficInputType === 'preset') {
+                        trafficPresets.forEach(p => p.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectedTrafficLevel = parseInt(this.getAttribute('data-traffic'));
+                        selectedTrafficTime = parseInt(this.getAttribute('data-time'));
+                        updateTrafficInfo();
+                    }
+                });
+            });
+            
+            // Event listener untuk input custom
+            document.getElementById('customHours').addEventListener('input', updateCustomTrafficInfo);
+            document.getElementById('customMinutes').addEventListener('input', updateCustomTrafficInfo);
+            
+            // Pilih Pertalite, Lancar, dan preset secara default
+            fuelTypes[0].classList.add('selected');
+            toggleOptions[0].classList.add('selected');
+            trafficPresets[0].classList.add('selected');
+            
+            // Update info kemacetan untuk preset
+            function updateTrafficInfo() {
+                let trafficText = '';
+                
+                switch(selectedTrafficLevel) {
+                    case 0:
+                        trafficText = 'Kondisi jalan lancar, tidak ada tambahan waktu';
+                        break;
+                    case 1:
+                        trafficText = 'Sedikit macet, perjalanan lebih lama +15 menit';
+                        break;
+                    case 2:
+                        trafficText = 'Macet, perjalanan lebih lama +30 menit';
+                        break;
+                    case 3:
+                        trafficText = 'Macet parah, perjalanan lebih lama +60 menit';
+                        break;
+                }
+                
+                trafficInfo.textContent = trafficText;
+            }
+            
+            // Update info kemacetan untuk custom input
+            function updateCustomTrafficInfo() {
+                const hours = parseInt(document.getElementById('customHours').value) || 0;
+                const minutes = parseInt(document.getElementById('customMinutes').value) || 0;
+                selectedTrafficTime = (hours * 60) + minutes;
+                
+                let timeText = '';
+                if (hours > 0 && minutes > 0) {
+                    timeText = `${hours} jam ${minutes} menit`;
+                } else if (hours > 0) {
+                    timeText = `${hours} jam`;
+                } else if (minutes > 0) {
+                    timeText = `${minutes} menit`;
+                } else {
+                    timeText = '0 menit';
+                }
+                
+                trafficInfo.textContent = `Estimasi tambahan waktu karena macet: +${timeText}`;
+                selectedTrafficLevel = 4;
+            }
+            
+            // Tampilkan riwayat jika ada
+            renderHistory();
+            
+            calculateBtn.addEventListener('click', function() {
+                calculateFuel();
+            });
+            
+            savePdfBtn.addEventListener('click', function() {
+                saveAsPdf();
+            });
+            
+            saveHistoryBtn.addEventListener('click', function() {
+                saveToHistory();
+            });
+            
+            clearHistoryBtn.addEventListener('click', function() {
+                clearHistory();
+            });
+            
+            function calculateFuel() {
+                // Ambil nilai dari form
+                const distance = parseFloat(document.getElementById('distance').value);
+                const roundTrip = document.getElementById('roundTrip').checked;
+                const fuelConsumption = parseFloat(document.getElementById('fuelConsumption').value);
+                const avgSpeed = parseFloat(document.getElementById('avgSpeed').value);
+                
+                // Validasi input
+                if (isNaN(distance) || isNaN(fuelConsumption) || isNaN(avgSpeed) || isNaN(selectedFuelPrice)) {
+                    alert('Harap isi semua field dengan angka yang valid!');
+                    return;
+                }
+                
+                if (distance <= 0 || fuelConsumption <= 0 || avgSpeed <= 0 || selectedFuelPrice <= 0) {
+                    alert('Nilai harus lebih besar dari 0!');
+                    return;
+                }
+                
+                // Hitung total jarak
+                let totalDistance = distance;
+                if (roundTrip) {
+                    totalDistance = distance * 2;
+                }
+                
+                // Hitung waktu tempuh normal (tanpa macet)
+                const normalTimeMinutes = (totalDistance / avgSpeed) * 60;
+                
+                // Hitung waktu tempuh dengan macet
+                const actualTimeMinutes = normalTimeMinutes + selectedTrafficTime;
+                
+                // Hitung konsumsi BBM normal
+                const normalFuelUsed = totalDistance / fuelConsumption;
+                
+                // Hitung tambahan BBM karena macet
+                let trafficFuelFactor = 1;
+                if (selectedTrafficTime > 0) {
+                    if (selectedTrafficTime <= 15) {
+                        trafficFuelFactor = 1.1;
+                    } else if (selectedTrafficTime <= 30) {
+                        trafficFuelFactor = 1.25;
+                    } else {
+                        trafficFuelFactor = 1.5;
+                    }
+                }
+                
+                const actualFuelUsed = normalFuelUsed * trafficFuelFactor;
+                
+                // Hitung total biaya
+                const totalCost = actualFuelUsed * selectedFuelPrice;
+                
+                // Format waktu
+                const formatTime = (minutes) => {
+                    const hrs = Math.floor(minutes / 60);
+                    const mins = Math.round(minutes % 60);
+                    if (hrs === 0) {
+                        return `${mins} menit`;
+                    } else if (mins === 0) {
+                        return `${hrs} jam`;
+                    } else {
+                        return `${hrs} jam ${mins} menit`;
+                    }
+                };
+                
+                // Tampilkan hasil
+                document.getElementById('fuelTypeResult').textContent = selectedFuelType;
+                document.getElementById('fuelPriceResult').textContent = 'Rp ' + selectedFuelPrice.toLocaleString('id-ID') + '/L';
+                document.getElementById('totalDistance').textContent = totalDistance.toFixed(1) + ' km';
+                document.getElementById('fuelUsed').textContent = actualFuelUsed.toFixed(2) + ' liter';
+                document.getElementById('travelTime').textContent = formatTime(actualTimeMinutes);
+                document.getElementById('totalCost').textContent = 'Rp ' + totalCost.toLocaleString('id-ID');
+                
+                // Tampilkan rincian waktu
+                document.getElementById('normalTime').textContent = formatTime(normalTimeMinutes);
+                document.getElementById('extraTime').textContent = formatTime(selectedTrafficTime);
+                document.getElementById('totalTime').textContent = formatTime(actualTimeMinutes);
+                
+                // Tampilkan dampak kemacetan
+                document.getElementById('extraFuel').textContent = (actualFuelUsed - normalFuelUsed).toFixed(2) + ' liter';
+                document.getElementById('extraCost').textContent = 'Rp ' + ((actualFuelUsed - normalFuelUsed) * selectedFuelPrice).toLocaleString('id-ID');
+                
+                // Tampilkan bagian dampak macet jika ada
+                if (selectedTrafficTime > 0) {
+                    trafficImpact.style.display = 'block';
+                    timeBreakdown.style.display = 'block';
+                } else {
+                    trafficImpact.style.display = 'none';
+                    timeBreakdown.style.display = 'none';
+                }
+                
+                // Simpan data hasil perhitungan
+                window.currentCalculation = {
+                    fuelType: selectedFuelType,
+                    fuelPrice: selectedFuelPrice,
+                    distance: distance,
+                    roundTrip: roundTrip,
+                    fuelConsumption: fuelConsumption,
+                    avgSpeed: avgSpeed,
+                    trafficInputType: trafficInputType,
+                    trafficLevel: selectedTrafficLevel,
+                    trafficTime: selectedTrafficTime,
+                    totalDistance: totalDistance,
+                    normalFuelUsed: normalFuelUsed,
+                    actualFuelUsed: actualFuelUsed,
+                    normalTimeMinutes: normalTimeMinutes,
+                    actualTimeMinutes: actualTimeMinutes,
+                    totalCost: totalCost,
+                    timestamp: new Date().toLocaleString('id-ID')
+                };
+                
+                // Tampilkan bagian hasil
+                resultDiv.style.display = 'block';
+            }
+            
+            function saveToHistory() {
+                if (!window.currentCalculation) {
+                    alert('Tidak ada perhitungan untuk disimpan!');
+                    return;
+                }
+                
+                calculationHistory.unshift(window.currentCalculation);
+                localStorage.setItem('fuelCalculationHistory', JSON.stringify(calculationHistory));
+                renderHistory();
+                alert('Perhitungan berhasil disimpan ke riwayat!');
+            }
+            
+            function renderHistory() {
+                if (calculationHistory.length === 0) {
+                    emptyHistory.style.display = 'block';
+                    historyList.innerHTML = '';
+                    historyList.appendChild(emptyHistory);
+                    return;
+                }
+                
+                emptyHistory.style.display = 'none';
+                historyList.innerHTML = '';
+                
+                calculationHistory.forEach((calc, index) => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    
+                    const formatTime = (minutes) => {
+                        const hrs = Math.floor(minutes / 60);
+                        const mins = Math.round(minutes % 60);
+                        return `${hrs}j ${mins}m`;
+                    };
+                    
+                    historyItem.innerHTML = `
+                        <div class="history-header">
+                            <div class="history-date">${calc.timestamp}</div>
+                            <div class="history-actions">
+                                <button class="history-btn" onclick="viewCalculation(${index})">
+                                    <i class="fas fa-eye"></i> Lihat
+                                </button>
+                                <button class="history-btn" onclick="deleteCalculation(${index})">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">BBM:</span>
+                            <span class="result-value">${calc.fuelType}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Harga:</span>
+                            <span class="result-value">Rp ${calc.fuelPrice.toLocaleString('id-ID')}/L</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Jarak:</span>
+                            <span class="result-value">${calc.totalDistance.toFixed(1)} km</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Tambahan Waktu:</span>
+                            <span class="result-value">${formatTime(calc.trafficTime)}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Biaya:</span>
+                            <span class="result-value">Rp ${calc.totalCost.toLocaleString('id-ID')}</span>
+                        </div>
+                    `;
+                    
+                    historyList.appendChild(historyItem);
+                });
+            }
+            
+            function clearHistory() {
+                if (confirm('Apakah Anda yakin ingin menghapus semua riwayat perhitungan?')) {
+                    calculationHistory = [];
+                    localStorage.removeItem('fuelCalculationHistory');
+                    renderHistory();
+                }
+            }
+            
+            function saveAsPdf() {
+                if (!window.currentCalculation) {
+                    alert('Tidak ada perhitungan untuk diekspor!');
+                    return;
+                }
+                
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const calc = window.currentCalculation;
+                
+                // Format waktu untuk PDF
+                const formatTime = (minutes) => {
+                    const hrs = Math.floor(minutes / 60);
+                    const mins = Math.round(minutes % 60);
+                    if (hrs === 0) {
+                        return `${mins} menit`;
+                    } else if (mins === 0) {
+                        return `${hrs} jam`;
+                    } else {
+                        return `${hrs} jam ${mins} menit`;
+                    }
+                };
+                
+                // Header dengan gradient effect
+                doc.setFillColor(0, 51, 160);
+                doc.rect(0, 0, 220, 30, 'F');
+                
+                // Logo Pertamina
+                doc.setFillColor(255, 255, 255);
+                doc.circle(20, 15, 8, 'F');
+                doc.setFontSize(16);
+                doc.setTextColor(228, 0, 43);
+                doc.text('⛽', 17, 19);
+                
+                // Judul
+                doc.setFontSize(16);
+                doc.setTextColor(255, 255, 255);
+                doc.text('LAPORAN PERHITUNGAN BBM', 105, 18, { align: 'center' });
+                doc.setFontSize(10);
+                doc.text('PERTAMINA OFFICIAL CALCULATOR', 105, 24, { align: 'center' });
+                
+                // Garis pemisah
+                doc.setDrawColor(228, 0, 43);
+                doc.setLineWidth(0.5);
+                doc.line(15, 35, 195, 35);
+                
+                // Informasi Tanggal
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Dibuat pada: ${calc.timestamp}`, 15, 45);
+                
+                // Section: Informasi Perjalanan
+                doc.setFontSize(12);
+                doc.setTextColor(0, 51, 160);
+                doc.text('INFORMASI PERJALANAN', 15, 60);
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                let yPos = 70;
+                
+                const travelInfo = [
+                    `Jenis BBM: ${calc.fuelType}`,
+                    `Harga BBM: Rp ${calc.fuelPrice.toLocaleString('id-ID')}/liter`,
+                    `Jarak tempuh: ${calc.distance} km ${calc.roundTrip ? '(Pulang-Pergi)' : '(Satu Arah)'}`,
+                    `Total jarak: ${calc.totalDistance.toFixed(1)} km`,
+                    `Konsumsi BBM: ${calc.fuelConsumption} km/liter`,
+                    `Kecepatan rata-rata: ${calc.avgSpeed} km/jam`
+                ];
+                
+                travelInfo.forEach(info => {
+                    doc.text(info, 20, yPos);
+                    yPos += 7;
+                });
+                
+                // Section: Estimasi Macet
+                yPos += 5;
+                doc.setFontSize(12);
+                doc.setTextColor(0, 51, 160);
+                doc.text('ESTIMASI KEMACETAN', 15, yPos);
+                
+                yPos += 10;
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                
+                let trafficStatus = '';
+                if (calc.trafficTime === 0) {
+                    trafficStatus = 'Lancar';
+                } else if (calc.trafficTime <= 15) {
+                    trafficStatus = 'Sedikit Macet';
+                } else if (calc.trafficTime <= 30) {
+                    trafficStatus = 'Macet';
+                } else {
+                    trafficStatus = 'Macet Parah';
+                }
+                
+                doc.text(`Status: ${trafficStatus}`, 20, yPos);
+                yPos += 7;
+                doc.text(`Tambahan waktu: +${formatTime(calc.trafficTime)}`, 20, yPos);
+                
+                // Section: Hasil Perhitungan (Box dengan background)
+                yPos += 15;
+                doc.setFillColor(245, 245, 245);
+                doc.roundedRect(15, yPos, 180, 40, 3, 3, 'F');
+                doc.setDrawColor(200, 200, 200);
+                doc.roundedRect(15, yPos, 180, 40, 3, 3, 'D');
+                
+                doc.setFontSize(14);
+                doc.setTextColor(228, 0, 43);
+                doc.text('HASIL PERHITUNGAN', 105, yPos + 8, { align: 'center' });
+                
+                doc.setFontSize(11);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Konsumsi BBM: ${calc.actualFuelUsed.toFixed(2)} liter`, 25, yPos + 18);
+                doc.text(`Waktu tempuh: ${formatTime(calc.actualTimeMinutes)}`, 25, yPos + 26);
+                doc.text(`Total biaya: Rp ${calc.totalCost.toLocaleString('id-ID')}`, 25, yPos + 34);
+                
+                // Section: Rincian Waktu
+                yPos += 50;
+                doc.setFontSize(12);
+                doc.setTextColor(0, 51, 160);
+                doc.text('RINCIAN WAKTU', 15, yPos);
+                
+                yPos += 10;
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                
+                const timeDetails = [
+                    `Waktu normal: ${formatTime(calc.normalTimeMinutes)}`,
+                    `Tambahan macet: ${formatTime(calc.trafficTime)}`,
+                    `Total waktu: ${formatTime(calc.actualTimeMinutes)}`
+                ];
+                
+                timeDetails.forEach(detail => {
+                    doc.text(detail, 20, yPos);
+                    yPos += 7;
+                });
+                
+                // Section: Dampak Kemacetan (jika ada)
+                if (calc.trafficTime > 0) {
+                    yPos += 5;
+                    doc.setFillColor(255, 248, 225);
+                    doc.roundedRect(15, yPos, 180, 25, 3, 3, 'F');
+                    doc.setDrawColor(255, 193, 7);
+                    doc.roundedRect(15, yPos, 180, 25, 3, 3, 'D');
+                    
+                    doc.setFontSize(12);
+                    doc.setTextColor(255, 152, 0);
+                    doc.text('DAMPAK KEMACETAN', 105, yPos + 8, { align: 'center' });
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`Tambahan BBM: ${(calc.actualFuelUsed - calc.normalFuelUsed).toFixed(2)} liter`, 25, yPos + 16);
+                    doc.text(`Tambahan biaya: Rp ${((calc.actualFuelUsed - calc.normalFuelUsed) * calc.fuelPrice).toLocaleString('id-ID')}`, 25, yPos + 22);
+                    
+                    yPos += 30;
+                }
+                
+                // Footer
+                yPos += 10;
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.text('* Hasil perhitungan ini adalah estimasi. Konsumsi BBM aktual dapat bervariasi.', 15, yPos);
+                yPos += 4;
+                doc.text('** Dokumen ini dibuat secara otomatis oleh Kalkulator BBM Pertamina', 15, yPos);
+                
+                // Garis footer
+                doc.setDrawColor(0, 51, 160);
+                doc.setLineWidth(0.3);
+                doc.line(15, yPos + 5, 195, yPos + 5);
+                
+                // Simpan PDF
+                const fileName = `Laporan-BBM-${calc.fuelType}-${new Date().toISOString().slice(0, 10)}.pdf`;
+                doc.save(fileName);
+            }
+            
+            // Fungsi global untuk aksi riwayat
+            window.viewCalculation = function(index) {
+                const calc = calculationHistory[index];
+                
+                document.getElementById('distance').value = calc.distance;
+                document.getElementById('roundTrip').checked = calc.roundTrip;
+                document.getElementById('fuelConsumption').value = calc.fuelConsumption;
+                document.getElementById('avgSpeed').value = calc.avgSpeed;
+                
+                fuelTypes.forEach(type => {
+                    if (type.getAttribute('data-fuel') === calc.fuelType) {
+                        type.click();
+                        const priceInput = type.querySelector('.fuel-price-input');
+                        priceInput.value = calc.fuelPrice;
+                    }
+                });
+                
+                if (calc.trafficInputType === 'preset') {
+                    toggleOptions[0].click();
+                    trafficPresets.forEach(preset => {
+                        if (parseInt(preset.getAttribute('data-time')) === calc.trafficTime) {
+                            preset.click();
+                        }
+                    });
+                } else {
+                    toggleOptions[1].click();
+                    const hours = Math.floor(calc.trafficTime / 60);
+                    const minutes = calc.trafficTime % 60;
+                    document.getElementById('customHours').value = hours;
+                    document.getElementById('customMinutes').value = minutes;
+                    updateCustomTrafficInfo();
+                }
+                
+                calculateFuel();
+                document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+            };
+            
+            window.deleteCalculation = function(index) {
+                if (confirm('Apakah Anda yakin ingin menghapus perhitungan ini?')) {
+                    calculationHistory.splice(index, 1);
+                    localStorage.setItem('fuelCalculationHistory', JSON.stringify(calculationHistory));
+                    renderHistory();
+                }
+            };
+        });
+    </script>
+</body>
+</html>
